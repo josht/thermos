@@ -14,7 +14,7 @@ services:
   redis:
     container_name: redis
     command: [ "redis-server", "--appendonly", "yes" ]
-    image: "redis:6.0.12-alpine"
+    image: "redis:7.2.2-alpine"
     restart: always
     volumes:
       - ./redis-data:/data
@@ -28,7 +28,7 @@ services:
     network_mode: host
   prometheus:
     container_name: prometheus
-    image: prom/prometheus-linux-armv7
+    image: prom/prometheus:latest
     restart: always
     volumes:
       - ./prometheus-config/prometheus.yml:/etc/prometheus/prometheus.yml
