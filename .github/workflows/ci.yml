@@ -32,9 +32,9 @@ jobs:
           docker push ghcr.io/${{ github.repository_owner }}/thermos:${{ github.sha }}
           docker push ghcr.io/${{ github.repository_owner }}/thermos:latest
 
-      -
-        name: Deploy
-        run: |
-          docker-compose pull
-          docker-compose up -d
-        working-directory: /home/pi/Projects/thermos
+#      -
+#        name: Deploy
+#        run: |
+#          docker-compose pull
+#          docker-compose up -d
+#        working-directory: /home/pi/Projects/thermos
