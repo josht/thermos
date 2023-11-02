@@ -24,8 +24,8 @@ jobs:
       -
         name: Tag
         run: |
-          docker tag ghcr.io/${{ github.repository_owner }}/thermos ghcr.io/josht/thermos:latest
-          docker tag ghcr.io/${{ github.repository_owner }}/thermos ghcr.io/josht/thermos:${{ github.sha }}
+          docker tag ghcr.io/${{ github.repository_owner }}/thermos ghcr.io/${{ github.repository_owner }}/thermos:latest
+          docker tag ghcr.io/${{ github.repository_owner }}/thermos ghcr.io/${{ github.repository_owner }}/thermos:${{ github.sha }}
       -
         name: Push
         run: |
