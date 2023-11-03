@@ -2,7 +2,7 @@ version: '3'
 services:
   thermos:
     container_name: thermos
-    image: ghcr.io/truncj/thermos:latest
+    image: ghcr.io/${GH_USER:-josht}/thermos:latest
     restart: always
     privileged: true
     volumes:
