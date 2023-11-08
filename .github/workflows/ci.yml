@@ -26,16 +26,16 @@ jobs:
       -
         name: Build, Tag and Push
         run: docker buildx build --push --platform=linux/arm64/v8 --tag ghcr.io/${{ github.repository_owner }}/thermos:latest --tag ghcr.io/${{ github.repository_owner }}/thermos:${{ github.sha }} .
-      -
-        name: Tag
-        run: |
-          docker tag ghcr.io/${{ github.repository_owner }}/thermos ghcr.io/${{ github.repository_owner }}/thermos:latest
-          docker tag ghcr.io/${{ github.repository_owner }}/thermos ghcr.io/${{ github.repository_owner }}/thermos:${{ github.sha }}
-      -
-        name: Push
-        run: |
-          docker push ghcr.io/${{ github.repository_owner }}/thermos:${{ github.sha }}
-          docker push ghcr.io/${{ github.repository_owner }}/thermos:latest
+#      -
+#        name: Tag
+#        run: |
+#          docker tag ghcr.io/${{ github.repository_owner }}/thermos ghcr.io/${{ github.repository_owner }}/thermos:latest
+#          docker tag ghcr.io/${{ github.repository_owner }}/thermos ghcr.io/${{ github.repository_owner }}/thermos:${{ github.sha }}
+#      -
+#        name: Push
+#        run: |
+#          docker push ghcr.io/${{ github.repository_owner }}/thermos:${{ github.sha }}
+#          docker push ghcr.io/${{ github.repository_owner }}/thermos:latest
 
 #      -
 #        name: Deploy
