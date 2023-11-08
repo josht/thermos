@@ -1,6 +1,8 @@
 accessory.state
 config/config.json
 pyvenv.cfg
+redis-data/
+venv/
 __pycache__/
 .idea/
 
