@@ -49,7 +49,7 @@ class Thermostat(Accessory):
         self.current_temp = temp_service.get_characteristic('CurrentTemperature')
         self.target_temp = temp_service.get_characteristic('TargetTemperature')
         self.target_state = temp_service.get_characteristic('TargetHeatingCoolingState')
-        # self.current_state = temp_service.get_characteristic('CurrentHeatingCoolingState')
+        self.current_state = temp_service.get_characteristic('CurrentHeatingCoolingState')
 
         # Default unit to Fahrenheit (change to 0 for Celcius)
         temp_service.configure_char('TemperatureDisplayUnits', value=1)
@@ -58,7 +58,7 @@ class Thermostat(Accessory):
         self.target_temp.setter_callback = self.target_temp_changed
         self.current_temp.setter_callback = self.current_temp_changed
         self.target_state.setter_callback = self.target_state_changed
-        # self.current_state.setter_callback = self.current_state_changed
+        self.current_state.setter_callback = self.current_state_changed
 
         # initialize redis connection per device
         self.r = redis.Redis(
@@ -99,6 +99,9 @@ class Thermostat(Accessory):
 
         self.prev_status = ''
 
+    def current_state_changed(self, value):
+        logging.info(f'Current state changed: {value}')
+
     def target_state_changed(self, value):
         """This will be called every time the value of the CurrentTemperature
         is changed. Use setter_callbacks to react to user actions, e.g. setting the
@@ -137,9 +140,6 @@ class Thermostat(Accessory):
     async def run(self):
         """We override this method to implement what the accessory will do when it is
         started.
-
-        We set the current temperature to a random number. The decorator runs this method
-        every 3 seconds.
         """
         HEAT_ON = GPIO.LOW
         HEAT_OFF = GPIO.HIGH
@@ -203,7 +203,7 @@ class Thermostat(Accessory):
                 status = ''
 
                 # check that we want heat
-                if self.target_state.value == 0:
+                if self.target_state.value == 1:
                     # if heat relay is already on, check if above threshold
                     # if above, turn off... if still below keep on
                     if GPIO.input(self.relay_pin):
