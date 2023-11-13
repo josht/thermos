@@ -151,7 +151,7 @@ class Thermostat(Accessory):
 
         status = ''
 
-        self.processTemp(self)
+        self.processTemp()
         
         # to fahrenheit
         d = u"\u00b0"
@@ -214,7 +214,7 @@ class Thermostat(Accessory):
         except NoSensorFoundError:
             # attempt to solve "Task exception was never retrieved" and "w1thermsensor.errors.NoSensorFoundError"
             logging.error('NoSensorFoundError')
-            self.runNoSensor(self)
+            self.runNoSensor()
             return
 
         for sensor in sensors:
@@ -268,7 +268,7 @@ class Thermostat(Accessory):
 
                 status = ''
 
-                self.processTemp(self)
+                self.processTemp()
 
                 # to fahrenheit
                 d = u"\u00b0"
