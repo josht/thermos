@@ -1,6 +1,7 @@
 FROM secretclubhouse/thermostat-base:latest
-#COPY --from=app /app/venv /app/venv
-WORKDIR app
+
+RUN cd /app
+WORKDIR /app
 COPY main.py devices.py ./
 ENV PATH="/app/venv/bin:$PATH"
 CMD [ "python", "-u", "main.py"]
