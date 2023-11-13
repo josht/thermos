@@ -15,7 +15,7 @@ from RPi import GPIO
 
 from devices import Thermostat
 
-logging.basicConfig(level=logging.DEBUG, format="[%(module)s] %(asctime)ss %(message)s", datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(level=logging.INFO, format="[%(module)s] %(asctime)ss %(message)s", datefmt='%Y-%m-%d %H:%M:%S')
 
 
 def get_bridge(driver):
