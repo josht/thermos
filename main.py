@@ -20,14 +20,16 @@ logging.basicConfig(level=logging.INFO, format="[%(module)s] %(asctime)ss %(mess
 
 def get_bridge(driver):
     """Call this method to get a Bridge instead of a standalone accessory."""
-    bridge = Bridge(driver, 'Bridge')
+    bridge = Bridge(driver, 'ThermostatBridge')
 
-    tstat1 = Thermostat(driver, 'LivingRoom')
-    tstat2 = Thermostat(driver, 'SunRoom')
-    tstat3 = Thermostat(driver, 'Bedrooms')
-    tstat4 = Thermostat(driver, 'MasterBedroom')
-    tstat5 = Thermostat(driver, 'Downstairs')
-    tstat6 = Thermostat(driver, 'DownstairsBedrooms')
+    tstat1 = Thermostat(driver, 'Zone1')
+    tstat2 = Thermostat(driver, 'Zone2')
+    tstat3 = Thermostat(driver, 'Zone3')
+    tstat4 = Thermostat(driver, 'Zone4')
+    tstat5 = Thermostat(driver, 'Zone5')
+    tstat6 = Thermostat(driver, 'Zone6')
+    tstat7 = Thermostat(driver, 'Zone7')
+
 
     bridge.add_accessory(tstat1)
     bridge.add_accessory(tstat2)
@@ -35,6 +37,7 @@ def get_bridge(driver):
     bridge.add_accessory(tstat4)
     bridge.add_accessory(tstat5)
     bridge.add_accessory(tstat6)
+    bridge.add_accessory(tstat7)
 
     return bridge
 
@@ -47,7 +50,7 @@ driver.add_accessory(accessory=get_bridge(driver))
 
 # use a gpio pin (22) to power the temp sensors
 # this allows for power cycling the sensors when errors occur
-vcc_pin = 22
+vcc_pin = 0
 GPIO.setup(vcc_pin, GPIO.OUT)
 GPIO.output(vcc_pin, GPIO.HIGH)
 

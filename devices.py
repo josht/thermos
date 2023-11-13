@@ -8,7 +8,7 @@ import redis
 from RPi import GPIO
 from pyhap.accessory import Accessory
 from pyhap.const import CATEGORY_SENSOR, CATEGORY_THERMOSTAT
-from w1thermsensor import W1ThermSensor, NoSensorFoundError
+from w1thermsensor import W1ThermSensor, NoSensorFoundError, Unit
 from prometheus_client import Gauge, Counter
 
 
@@ -160,7 +160,7 @@ class Thermostat(Accessory):
                     start = time.process_time()
                     if 'extra_sensor' not in data:
                         # use thermostat temperature sensor
-                        temp = sensor.get_temperature()
+                        temp = sensor.get_temperature(Unit.DEGREES_C)
                     else:
                         try:
                             resp = requests.get(data['extra_sensor'], timeout=3)
@@ -169,7 +169,7 @@ class Thermostat(Accessory):
                             temp = resp.json()['temp_c']
                         except requests.exceptions.RequestException as error:
                             # if extra_sensor fails, default to thermostat temperature sensor
-                            temp = sensor.get_temperature()
+                            temp = sensor.get_temperature(Unit.DEGREES_C)
                             logging.error(f'{self.display_name} extra_sensor is unavailable using {sensor.id} - {error}')
 
                     # power cycle vcc for temp sensors if we get an error reading
