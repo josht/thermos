@@ -100,7 +100,14 @@ class Thermostat(Accessory):
         self.prev_status = ''
 
     def current_state_changed(self, value):
-        logging.info(f'Current state changed: {value}')
+        # get existing target_state
+        json_state = json.loads(self.r.get(self.display_name))
+
+        # set new target_state
+        json_state['current_state'] = value
+        self.r.set(self.display_name, json.dumps(json_state))
+
+        print('Current state [TARGET] changed to: ', value)
 
     def target_state_changed(self, value):
         """This will be called every time the value of the CurrentTemperature
@@ -210,20 +217,24 @@ class Thermostat(Accessory):
                         if self.current_temp.value - self.target_temp.value >= 0.5:
                             status = 'HEAT ON - TEMP IS ABOVE TOP THRESHOLD, TURNING OFF'
                             GPIO.output(self.relay_pin, HEAT_OFF)
+                            self.current_state.set_value(0)
                         else:
                             status = 'HEAT ON - TEMP IS BELOW TOP THRESHOLD, KEEPING ON'
                             GPIO.output(self.relay_pin, HEAT_ON)
+                            self.current_state.set_value(1)
                     # if heat relay is not already on, check if below threshold
                     elif not GPIO.input(self.relay_pin):
                         if self.current_temp.value - self.target_temp.value <= -0.5:
                             status = 'HEAT OFF - TEMP IS BELOW BOTTOM THRESHOLD, TURNING ON'
                             GPIO.output(self.relay_pin, HEAT_ON)
+                            self.current_state.set_value(1)
                         else:
                             status = 'HEAT OFF - KEEPING OFF'
                 else:
                     # turn off heat
                     status = 'HEAT OFF - NOT REQUESTED'
                     GPIO.output(self.relay_pin, HEAT_OFF)
+                    self.current_state.set_value(0)
 
                 if status == self.prev_status:
                     status = ''
