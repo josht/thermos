@@ -19,6 +19,7 @@ heat_status_gauge = Gauge(f"heat_status", "Heat On/Off Status", labelnames=["roo
 response_time_gauge = Gauge(f"response_time", "Temp Sensor Response Time", labelnames=["room"])
 reset_error_counter = Counter(f"reset_error_count", "Sensor Reset Errors", labelnames=["room"])
 
+logging.basicConfig(level=logging.debug)
 
 class Thermostat(Accessory):
     category = CATEGORY_THERMOSTAT  # This is for the icon in the iOS Home app.
@@ -223,6 +224,7 @@ class Thermostat(Accessory):
             data = json.loads(self.r.get(self.display_name))
             response_time = None
 
+            logging.debug(f'checking sensor id: {sensor.id}')
             # get temperature
             if sensor.id == data['temp_id']:
                 try:
