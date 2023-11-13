@@ -140,7 +140,7 @@ class Thermostat(Accessory):
         start = time.process_time()
 
         # Set fake temp
-        temp = 22.22
+        temp = 22.2222
 
         self.current_temp.set_value(temp)
 
@@ -161,28 +161,30 @@ class Thermostat(Accessory):
 
     
     def processTemp(self):
+        HEAT_ON = GPIO.LOW
+        HEAT_OFF = GPIO.HIGH
         # check that we want heat
-        if self.target_state.value == 1:
+        if self.target_state.value == 0:
             # if heat relay is already on, check if above threshold
             # if above, turn off... if still below keep on
             if GPIO.input(self.relay_pin):
                 if self.current_temp.value - self.target_temp.value >= 0.5:
                     status = 'HEAT ON - TEMP IS ABOVE TOP THRESHOLD, TURNING OFF'
-                    GPIO.output(self.relay_pin, GPIO.LOW)
+                    GPIO.output(self.relay_pin, HEAT_OFF)
                 else:
                     status = 'HEAT ON - TEMP IS BELOW TOP THRESHOLD, KEEPING ON'
-                    GPIO.output(self.relay_pin, GPIO.HIGH)
+                    GPIO.output(self.relay_pin, HEAT_ON)
             # if heat relay is not already on, check if below threshold
             elif not GPIO.input(self.relay_pin):
                 if self.current_temp.value - self.target_temp.value <= -0.5:
                     status = 'HEAT OFF - TEMP IS BELOW BOTTOM THRESHOLD, TURNING ON'
-                    GPIO.output(self.relay_pin, GPIO.HIGH)
+                    GPIO.output(self.relay_pin, HEAT_ON)
                 else:
                     status = 'HEAT OFF - KEEPING OFF'
         else:
             # turn off heat
             status = 'HEAT OFF - NOT REQUESTED'
-            GPIO.output(self.relay_pin, GPIO.LOW)
+            GPIO.output(self.relay_pin, HEAT_OFF)
 
         if status == self.prev_status:
             status = ''
@@ -214,8 +216,7 @@ class Thermostat(Accessory):
         except NoSensorFoundError:
             # attempt to solve "Task exception was never retrieved" and "w1thermsensor.errors.NoSensorFoundError"
             logging.error('NoSensorFoundError')
-            self.runNoSensor()
-            return
+            return self.runNoSensor()
 
         for sensor in sensors:
 
