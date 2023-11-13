@@ -52,7 +52,7 @@ class Thermostat(Accessory):
         self.current_state = temp_service.get_characteristic('CurrentHeatingCoolingState')
 
         # Default unit to Fahrenheit (change to 0 for Celcius)
-        temp_service.configure_char('TemperatureDisplayUnits', value=1)
+        temp_service.configure_char('TemperatureDisplayUnits', value=0)
 
         # Having a callback is optional, but you can use it to add functionality.
         self.target_temp.setter_callback = self.target_temp_changed
