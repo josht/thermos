@@ -222,7 +222,7 @@ class Thermostat(Accessory):
             data = json.loads(self.r.get(self.display_name))
             response_time = None
 
-            logging.debug(f'checking sensor id: {sensor.id}')
+            logging.debug(f'{self.display_name} checking sensor id {sensor.id}')
             # get temperature
             if sensor.id == data['temp_id']:
                 try:
