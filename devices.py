@@ -133,6 +133,73 @@ class Thermostat(Accessory):
         """
         print('Temperature [CURRENT] changed to: ', value)
 
+    # Run this if no sensor is found. Default temp to 72
+    def runNoSensor(self):
+        data = json.loads(self.r.get(self.display_name))
+        response_time = None
+        start = time.process_time()
+
+        # Set fake temp
+        temp = 22.22
+
+        self.current_temp.set_value(temp)
+
+        response_time = time.process_time() - start
+
+        # response time for temperature sensor
+        response_time_gauge.labels(room=self.display_name).set(response_time)
+
+        status = ''
+
+        self.processTemp(self)
+        
+        # to fahrenheit
+        d = u"\u00b0"
+        cf = round(9.0/5.0 * self.current_temp.value + 32, 2)
+        tf = round(9.0/5.0 * self.target_temp.value + 32, 2)
+        logging.info(f'{self.display_name} (Current:{cf}{d}F Target:{tf}{d}F) {status}')
+
+    
+    def processTemp(self):
+        # check that we want heat
+        if self.target_state.value == 1:
+            # if heat relay is already on, check if above threshold
+            # if above, turn off... if still below keep on
+            if GPIO.input(self.relay_pin):
+                if self.current_temp.value - self.target_temp.value >= 0.5:
+                    status = 'HEAT ON - TEMP IS ABOVE TOP THRESHOLD, TURNING OFF'
+                    GPIO.output(self.relay_pin, GPIO.LOW)
+                else:
+                    status = 'HEAT ON - TEMP IS BELOW TOP THRESHOLD, KEEPING ON'
+                    GPIO.output(self.relay_pin, GPIO.HIGH)
+            # if heat relay is not already on, check if below threshold
+            elif not GPIO.input(self.relay_pin):
+                if self.current_temp.value - self.target_temp.value <= -0.5:
+                    status = 'HEAT OFF - TEMP IS BELOW BOTTOM THRESHOLD, TURNING ON'
+                    GPIO.output(self.relay_pin, GPIO.HIGH)
+                else:
+                    status = 'HEAT OFF - KEEPING OFF'
+        else:
+            # turn off heat
+            status = 'HEAT OFF - NOT REQUESTED'
+            GPIO.output(self.relay_pin, GPIO.LOW)
+
+        if status == self.prev_status:
+            status = ''
+        else:
+            self.prev_status = status
+
+        # to fahrenheit
+        d = u"\u00b0"
+        cf = round(9.0/5.0 * self.current_temp.value + 32, 2)
+        tf = round(9.0/5.0 * self.target_temp.value + 32, 2)
+
+        # set metric values for prometheus
+        current_temp_gauge.labels(room=self.display_name, heat_status=self.target_state.value).set(cf)
+        target_temp_gauge.labels(room=self.display_name, heat_status=self.target_state.value).set(tf)
+        heat_status_gauge.labels(room=self.display_name).set(GPIO.input(self.relay_pin))
+
+
     @Accessory.run_at_interval(3)  # Run this method every 3 seconds
     # The `run` method can be `async` as well
     async def run(self):
@@ -147,6 +214,7 @@ class Thermostat(Accessory):
         except NoSensorFoundError:
             # attempt to solve "Task exception was never retrieved" and "w1thermsensor.errors.NoSensorFoundError"
             logging.error('NoSensorFoundError')
+            self.runNoSensor(self)
             return
 
         for sensor in sensors:
@@ -200,44 +268,12 @@ class Thermostat(Accessory):
 
                 status = ''
 
-                # check that we want heat
-                if self.target_state.value == 1:
-                    # if heat relay is already on, check if above threshold
-                    # if above, turn off... if still below keep on
-                    if GPIO.input(self.relay_pin):
-                        if self.current_temp.value - self.target_temp.value >= 0.5:
-                            status = 'HEAT ON - TEMP IS ABOVE TOP THRESHOLD, TURNING OFF'
-                            GPIO.output(self.relay_pin, GPIO.LOW)
-                        else:
-                            status = 'HEAT ON - TEMP IS BELOW TOP THRESHOLD, KEEPING ON'
-                            GPIO.output(self.relay_pin, GPIO.HIGH)
-                    # if heat relay is not already on, check if below threshold
-                    elif not GPIO.input(self.relay_pin):
-                        if self.current_temp.value - self.target_temp.value <= -0.5:
-                            status = 'HEAT OFF - TEMP IS BELOW BOTTOM THRESHOLD, TURNING ON'
-                            GPIO.output(self.relay_pin, GPIO.HIGH)
-                        else:
-                            status = 'HEAT OFF - KEEPING OFF'
-                else:
-                    # turn off heat
-                    status = 'HEAT OFF - NOT REQUESTED'
-                    GPIO.output(self.relay_pin, GPIO.LOW)
-
-                if status == self.prev_status:
-                    status = ''
-                else:
-                    self.prev_status = status
+                self.processTemp(self)
 
                 # to fahrenheit
                 d = u"\u00b0"
                 cf = round(9.0/5.0 * self.current_temp.value + 32, 2)
                 tf = round(9.0/5.0 * self.target_temp.value + 32, 2)
-
-                # set metric values for prometheus
-                current_temp_gauge.labels(room=self.display_name, heat_status=self.target_state.value).set(cf)
-                target_temp_gauge.labels(room=self.display_name, heat_status=self.target_state.value).set(tf)
-                heat_status_gauge.labels(room=self.display_name).set(GPIO.input(self.relay_pin))
-
                 logging.info(f'{self.display_name} (Current:{cf}{d}F Target:{tf}{d}F) {status}')
 
     # The `stop` method can be `async` as well
