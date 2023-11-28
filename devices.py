@@ -216,7 +216,7 @@ class Thermostat(Accessory):
                     # if heat relay is already on, check if above threshold
                     # if above, turn off... if still below keep on
                     logging.info(f'{self.display_name} checking self.relay_pin: {GPIO.input(self.relay_pin)}')
-                    if GPIO.input(self.relay_pin):
+                    if not GPIO.input(self.relay_pin):
                         if self.current_temp.value - self.target_temp.value >= 0.5:
                             status = 'HEAT ON - TEMP IS ABOVE TOP THRESHOLD, TURNING OFF'
                             GPIO.output(self.relay_pin, HEAT_OFF)
@@ -226,7 +226,7 @@ class Thermostat(Accessory):
                             GPIO.output(self.relay_pin, HEAT_ON)
                             self.current_state.set_value(1)
                     # if heat relay is not already on, check if below threshold
-                    elif not GPIO.input(self.relay_pin):
+                    elif GPIO.input(self.relay_pin):
                         if self.current_temp.value - self.target_temp.value <= -0.5:
                             status = 'HEAT OFF - TEMP IS BELOW BOTTOM THRESHOLD, TURNING ON'
                             GPIO.output(self.relay_pin, HEAT_ON)
