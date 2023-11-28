@@ -211,11 +211,11 @@ class Thermostat(Accessory):
                 status = ''
 
                 # check that we want heat
-                logging.info(f'{self.display_name} target_state.value: {self.target_state.value}')
+                logging.debug(f'{self.display_name} target_state.value: {self.target_state.value}')
                 if self.target_state.value == 1:
                     # if heat relay is already on, check if above threshold
                     # if above, turn off... if still below keep on
-                    logging.info(f'{self.display_name} checking self.relay_pin: {GPIO.input(self.relay_pin)}')
+                    logging.debug(f'{self.display_name} checking self.relay_pin: {GPIO.input(self.relay_pin)}')
                     if not GPIO.input(self.relay_pin):
                         if self.current_temp.value - self.target_temp.value >= 0.5:
                             status = 'HEAT ON - TEMP IS ABOVE TOP THRESHOLD, TURNING OFF'
@@ -239,9 +239,9 @@ class Thermostat(Accessory):
                     GPIO.output(self.relay_pin, HEAT_OFF)
                     self.current_state.set_value(0)
 
-                logging.info(f'{self.display_name} (status: {status} | self.prev_status {self.prev_status})')
+                logging.debug(f'{self.display_name} (status: {status} | self.prev_status {self.prev_status})')
                 if status == self.prev_status:
-                    logging.info(f'{self.display_name} (status unchanged)')
+                    logging.debug(f'{self.display_name} (status unchanged)')
                     # status = ''
                 else:
                     self.prev_status = status
