@@ -53,6 +53,7 @@ class Thermostat(Accessory):
 
         # Default unit to Fahrenheit (change to 0 for Celcius)
         temp_service.configure_char('TemperatureDisplayUnits', value=0)
+        self.target_state.allow_invalid_client_values = True
 
         # Having a callback is optional, but you can use it to add functionality.
         self.target_temp.setter_callback = self.target_temp_changed
@@ -210,6 +211,7 @@ class Thermostat(Accessory):
                 status = ''
 
                 # check that we want heat
+                logging.info(f'{self.display} target_state.value: {self.target_state.value}')
                 if self.target_state.value == 1:
                     # if heat relay is already on, check if above threshold
                     # if above, turn off... if still below keep on
@@ -236,6 +238,7 @@ class Thermostat(Accessory):
                     GPIO.output(self.relay_pin, HEAT_OFF)
                     #self.current_state.set_value(0)
 
+                logging.info(f'{self.display} (status: {status} | self.prev_status {self.prev_status})')
                 if status == self.prev_status:
                     status = ''
                 else:
