@@ -166,6 +166,8 @@ class Thermostat(Accessory):
             logging.debug(f'{self.display_name} checking sensor id {sensor.id}')
             # get temperature
             if sensor.id == data['temp_id']:
+                # power cycle vcc for temp sensors if we get an error reading
+                vcc_pin = 0
                 try:
                     start = time.process_time()
                     if 'extra_sensor' not in data:
@@ -182,8 +184,6 @@ class Thermostat(Accessory):
                             temp = sensor.get_temperature(Unit.DEGREES_C)
                             logging.error(f'{self.display_name} extra_sensor is unavailable using {sensor.id} - {error}')
 
-                    # power cycle vcc for temp sensors if we get an error reading
-                    vcc_pin = 0
                     # If greater than 100F or less than 32F
                     # ie. read error returns -172C
                     if temp > 37 or temp < 0:
