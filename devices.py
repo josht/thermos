@@ -202,7 +202,10 @@ class Thermostat(Accessory):
                 except Exception as exception:
                     response_time = time.process_time() - start
                     reset_error_counter.labels(room=self.display_name).inc()
-                    logging.error(f'{self.display_name} - {exception} - setting default temp')
+                    logging.error(f'{self.display_name} - {exception} - setting default temp - power cycling ')
+                    GPIO.output(vcc_pin, GPIO.LOW)
+                    time.sleep(1)
+                    GPIO.output(vcc_pin, GPIO.HIGH)
                     temp = 27.1
                     #return
 
