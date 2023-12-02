@@ -206,7 +206,7 @@ class Thermostat(Accessory):
                     GPIO.output(vcc_pin, GPIO.LOW)
                     time.sleep(1)
                     GPIO.output(vcc_pin, GPIO.HIGH)
-                    temp = 27.1
+                    self.current_temp.set_value(27.1)
                     #return
 
                 # response time for temperature sensor
