@@ -202,8 +202,9 @@ class Thermostat(Accessory):
                 except Exception as exception:
                     response_time = time.process_time() - start
                     reset_error_counter.labels(room=self.display_name).inc()
-                    logging.error(f'{self.display_name} - {exception}')
-                    return
+                    logging.error(f'{self.display_name} - {exception} - setting default temp')
+                    temp = 27.1
+                    #return
 
                 # response time for temperature sensor
                 response_time_gauge.labels(room=self.display_name).set(response_time)
