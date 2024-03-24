@@ -157,6 +157,8 @@ class Thermostat(Accessory):
             # attempt to solve "Task exception was never retrieved" and "w1thermsensor.errors.NoSensorFoundError"
             logging.error('NoSensorFoundError')
             return
+        
+        sensorBeingReset = dict()
 
         for sensor in sensors:
 
@@ -166,6 +168,10 @@ class Thermostat(Accessory):
             logging.debug(f'{self.display_name} checking sensor id {sensor.id}')
             # get temperature
             if sensor.id == data['temp_id']:
+                # initialize sensorBeingReset dict
+                if sensorBeingReset.get(sensor.id) is None:
+                    sensorBeingReset[sensor.id] = False
+
                 # power cycle vcc for temp sensors if we get an error reading
                 vcc_pin = 0
                 try:
@@ -187,10 +193,18 @@ class Thermostat(Accessory):
                     # If greater than 100F or less than 32F
                     # ie. read error returns -172C
                     if temp > 37 or temp < 0:
-                        logging.error(f'{self.display_name} reading out of range - power cycling')
-                        GPIO.output(vcc_pin, GPIO.LOW)
-                        time.sleep(1)
-                        GPIO.output(vcc_pin, GPIO.HIGH)
+                        # if sensor is not already being reset
+                        if sensorBeingReset.get(sensor.id) is False:
+                            logging.error(f'{self.display_name} reading out of range - power cycling')
+                            sensorBeingReset[sensor.id] = True
+                            GPIO.output(vcc_pin, GPIO.LOW)
+                            time.sleep(2)
+                            GPIO.output(vcc_pin, GPIO.HIGH)
+                            sensorBeingReset[sensor.id] = False
+                        else:
+                            # if sensor is already being reset
+                            logging.error(f'{self.display_name} reading out of range - power cycling - already in progress')
+                            time.sleep(3)
 
                     self.current_temp.set_value(temp)
 
@@ -202,10 +216,16 @@ class Thermostat(Accessory):
                 except Exception as exception:
                     response_time = time.process_time() - start
                     reset_error_counter.labels(room=self.display_name).inc()
-                    logging.error(f'{self.display_name} - {exception} - setting default temp - power cycling - {self.current_temp.value}')
-                    GPIO.output(vcc_pin, GPIO.LOW)
-                    time.sleep(1)
-                    GPIO.output(vcc_pin, GPIO.HIGH)
+                    if sensorBeingReset.get(sensor.id) is None:
+                        logging.error(f'{self.display_name} - {exception} - setting default temp - power cycling - {self.current_temp.value}')
+                        sensorBeingReset[sensor.id] = True
+                        GPIO.output(vcc_pin, GPIO.LOW)
+                        time.sleep(2)
+                        GPIO.output(vcc_pin, GPIO.HIGH)
+                        sensorBeingReset[sensor.id] = False
+                    else:
+                        logging.error(f'{self.display_name} - {exception} - setting default temp - power cycling - {self.current_temp.value} - already in progress')
+                        time.sleep(3)
                     if self.current_temp.value < 1:
                         self.current_temp.set_value(21.1)
                     #return
