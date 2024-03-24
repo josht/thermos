@@ -190,9 +190,9 @@ class Thermostat(Accessory):
                             temp = sensor.get_temperature(Unit.DEGREES_C)
                             logging.error(f'{self.display_name} extra_sensor is unavailable using {sensor.id} - {error}')
 
-                    # If greater than 100F or less than 32F
-                    # ie. read error returns -172C
-                    if temp > 37 or temp < 0:
+                    # If greater than 100F or less than 37.4F
+                    # ie. read error returns -0.085C
+                    if temp > 37 or temp < 3:
                         # if sensor is not already being reset
                         if sensorBeingReset.get(sensor.id) is False:
                             logging.error(f'{self.display_name} reading out of range - power cycling')
@@ -216,7 +216,7 @@ class Thermostat(Accessory):
                 except Exception as exception:
                     response_time = time.process_time() - start
                     reset_error_counter.labels(room=self.display_name).inc()
-                    if sensorBeingReset.get(sensor.id) is None:
+                    if sensorBeingReset.get(sensor.id) is False:
                         logging.error(f'{self.display_name} - {exception} - setting default temp - power cycling - {self.current_temp.value}')
                         sensorBeingReset[sensor.id] = True
                         GPIO.output(vcc_pin, GPIO.LOW)
