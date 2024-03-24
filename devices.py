@@ -143,7 +143,7 @@ class Thermostat(Accessory):
         """
         print('Temperature [CURRENT] changed to: ', value)
 
-    @Accessory.run_at_interval(3)  # Run this method every 3 seconds
+    @Accessory.run_at_interval(6)  # Run this method every 3 seconds
     # The `run` method can be `async` as well
     def run(self):
         """We override this method to implement what the accessory will do when it is
@@ -198,13 +198,13 @@ class Thermostat(Accessory):
                             logging.error(f'{self.display_name} reading out of range - power cycling')
                             sensorBeingReset[sensor.id] = True
                             GPIO.output(vcc_pin, GPIO.LOW)
-                            time.sleep(2)
+                            time.sleep(3)
                             GPIO.output(vcc_pin, GPIO.HIGH)
                             sensorBeingReset[sensor.id] = False
                         else:
                             # if sensor is already being reset
                             logging.error(f'{self.display_name} reading out of range - power cycling - already in progress')
-                            time.sleep(3)
+                            time.sleep(5)
 
                     self.current_temp.set_value(temp)
 
@@ -220,12 +220,12 @@ class Thermostat(Accessory):
                         logging.error(f'{self.display_name} - {exception} - setting default temp - power cycling - {self.current_temp.value}')
                         sensorBeingReset[sensor.id] = True
                         GPIO.output(vcc_pin, GPIO.LOW)
-                        time.sleep(2)
+                        time.sleep(3)
                         GPIO.output(vcc_pin, GPIO.HIGH)
                         sensorBeingReset[sensor.id] = False
                     else:
                         logging.error(f'{self.display_name} - {exception} - setting default temp - power cycling - {self.current_temp.value} - already in progress')
-                        time.sleep(3)
+                        time.sleep(5)
                     if self.current_temp.value < 1:
                         self.current_temp.set_value(21.1)
                     #return
